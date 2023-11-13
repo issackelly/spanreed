@@ -27,10 +27,21 @@ impl RepoHandle {
         let other_id = self.handshake(&mut stream, &mut sink, direction).await?;
         tracing::trace!(?other_id, repo_id=?self.get_repo_id(), "Handshake complete");
 
+        #[cfg(feature = "metrics")]
+        metrics::increment_counter!("repo.connections");
+
         let stream = stream.map({
             let repo_id = self.get_repo_id().clone();
             move |msg| match msg {
                 Ok(Message::Repo(repo_msg)) => {
+                    #[cfg(feature = "metrics")]
+                    {
+                        let document_id = match repo_msg {
+                            RepoMessage::Sync { ref document_id, .. } => document_id,
+                            RepoMessage::Ephemeral { ref document_id, .. } => document_id,
+                        };
+                        metrics::increment_counter!("repo.message", "id" => repo_id.to_string(), "document_id" => document_id.to_string());
+                    }
                     tracing::trace!(?repo_msg, repo_id=?repo_id, "Received repo message");
                     Ok(repo_msg)
                 }

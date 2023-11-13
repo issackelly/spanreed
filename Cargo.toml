@@ -20,6 +20,7 @@ required-features = ["tokio-tungstenite"]
 [features]
 tokio = ["dep:tokio", "dep:tokio-util"]
 tokio-tungstenite = ["tokio", "dep:tokio-tungstenite", "dep:tungstenite"]
+metrics = ["dep:metrics"]
 
 [dependencies]
 automerge = { version = "0.5.0" }
@@ -32,6 +33,7 @@ tokio = { version = "1.27", features = ["rt"], optional = true }
 tokio-util = { version = "0.7.8", features = ["codec", "net" ], optional = true }
 bytes = { version = "1.4.0" }
 thiserror = "1.0.38"
+metrics = { version = "0.21.1", optional = true }
 minicbor = { version = "0.19.0", features = ["alloc"] }
 tokio-tungstenite = { version = "0.19.0", features = ["connect"], optional = true}
 tungstenite = { version = "0.19.0", optional = true }
