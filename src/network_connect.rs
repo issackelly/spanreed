@@ -28,7 +28,7 @@ impl RepoHandle {
         tracing::trace!(?other_id, repo_id=?self.get_repo_id(), "Handshake complete");
 
         #[cfg(feature = "metrics")]
-        metrics::increment_counter!("repo.connections");
+        metrics::counter!("repo.connections").increment(1);
 
         let stream = stream.map({
             let repo_id = self.get_repo_id().clone();
@@ -40,7 +40,8 @@ impl RepoHandle {
                             RepoMessage::Sync { ref document_id, .. } => document_id,
                             RepoMessage::Ephemeral { ref document_id, .. } => document_id,
                         };
-                        metrics::increment_counter!("repo.message", "id" => repo_id.to_string(), "document_id" => document_id.to_string());
+			#[cfg(feature = "metrics")]
+                        metrics::counter!("repo.message", "id" => repo_id.to_string(), "document_id" => document_id.to_string()).increment(1);
                     }
                     tracing::trace!(?repo_msg, repo_id=?repo_id, "Received repo message");
                     Ok(repo_msg)
